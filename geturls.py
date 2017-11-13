@@ -5,6 +5,9 @@
 # ret:	0:success
 # out:	urllist.csv
 
+# there is a need to divide into functions
+# and rename rightly
+
 #----------
 # get argument
 #----------
@@ -47,14 +50,13 @@ while 1:
 	s1 = s1[s1.find("\""):] # change this if url is string variable
 	s1 = s1[1:]
 	url = s1[:s1.find("\"")]
-	print(url[-4:])
 	if url == "":
 		break
 	elif url[-3:] != "htm" and url[-4:] != "html" and url[-1] != "/": # ex. css
 		continue
 	urls.append(url)
 
-print(urls)
+#print(urls)
 
 
 #----------
@@ -66,5 +68,26 @@ for l in urls:
 fw.close()
 
 
-retrun 0
+#----------
+# extract body
+#----------
+
+# there is a need to delete any words
+# except title, link, and plane text in body
+# and i feel like ruby is so easy to do it
+
+s1 = source
+s1 = s1[s1.find("<body"):]
+body = s1[:s1.find("</body>")]
+
+#print(body)
+
+
+#----------
+# output to file
+#----------
+fw = open("body.txt", "w")
+fw.write(body)
+fw.close()
+
 
