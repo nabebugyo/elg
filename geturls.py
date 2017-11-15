@@ -49,7 +49,9 @@ def extract_urls(source):
 			break
 		elif url[-3:] != "htm"\
 		 and url[-4:] != "html"\
-		 and url[-1] != "/": # ex. css
+		 and url[-1] != "/":
+			continue
+		elif url[:4] != "http":
 			continue
 		urls.append(url)
 	
