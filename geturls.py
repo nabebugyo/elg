@@ -26,7 +26,7 @@ def get_html(targeturl):
 	
 	html = response.read()
 	
-	source = html.decode("utf-8")
+	source = html.decode("utf-8", "ignore")
 	#print(source)
 
 	return source
