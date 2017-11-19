@@ -8,7 +8,7 @@
 # read new urllist
 # and join it to parent dataframe
 #----------
-def read_urllist_from_csv_to_df():
+def read_urllist_from_csv_to_df(parentkey, parentdepth):
 	import pandas as pd
 	try:
 		df = pd.read_csv("urllist.csv")
@@ -20,12 +20,14 @@ def read_urllist_from_csv_to_df():
 	df.columns = ["url"]
 	df["last_scanned_date"] = 0
 	df["score"] = 0
+	df["depth"] = parentdepth + 1
+	df["parent"] = parentkey
 	
 	# because it doesnt work below
 	# df[df.url[-4:] != "html" or df.url[-3:] != "htm"]
 	droplist = []
 	for key, row in df.iterrows():
-		url, date, score = list(row)
+		url, date, score, depth, parent = list(row)
 		if url[-4:] != "html"\
 		 and url[-3:] != "htm"\
 		 and url[-1] != "/":
@@ -46,6 +48,9 @@ def read_urllist_from_csv_to_df():
 #----------
 def queue_to_geturls(targeturl):
 	import geturls as g
+	import random
+	from time import sleep
+	sleep(random.randint(1,50)/100)
 	g.get_urls(targeturl)
 	return 0
 
@@ -54,24 +59,34 @@ def queue_to_geturls(targeturl):
 # scan each urls on urldb
 #----------
 def select_url(df_urldb):
+	# get date
 	import datetime
-	import sys
-	import pandas as pd
 	date = datetime.datetime.today()
 	#today = print("%s%s%s" % (date.year, date.month, date.day))
 	today = str(date.year)+str(date.month)+str(date.day)
-	for key, row in df_urldb.iterrows():
 	
-		url, date, score = list(row)
+	# choose a url from db and get cited urls
+#	import sys
+	import pandas as pd
+	for key, row in df_urldb.iterrows():
+
+		# get a record
+		url, date, score, depth, parent = list(row)
 		if url[:4] != "http":
 			continue
+
+		# limitation on searching depth
+		MAX_DEPTH = 10
+		if depth > MAX_DEPTH:
+			continue
 		
+		# pick a url and scan it
 		if date != today:
 			targeturl = url
 			print("try to scan: " + targeturl)
 			queue_to_geturls(targeturl)
 			df_urldb.last_scanned_date = today
-			new_urldb = read_urllist_from_csv_to_df()
+			new_urldb = read_urllist_from_csv_to_df(key, depth)
 			df_urldb = pd.concat([df_urldb, new_urldb])
 			df_urldb.reset_index(drop=True, inplace=True)
 			return df_urldb, key, 1
@@ -84,7 +99,9 @@ def select_url(df_urldb):
 def update_urldb():
 #	import pandas as pd
 #	df_urldb = pd.DataFrame()
-	df_urldb = read_urllist_from_csv_to_df()
+	initial_key = 0
+	initial_depth = 0
+	df_urldb = read_urllist_from_csv_to_df(initial_key, initial_depth)
 	ret = 1
 	while ret == 1:
 		df_urldb, last_scanned_id, ret = select_url(df_urldb)
