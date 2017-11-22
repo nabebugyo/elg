@@ -106,12 +106,13 @@ def update_urldb():
 	while ret == 1:
 		df_urldb, last_scanned_id, ret = select_url(df_urldb)
 		print(df_urldb)
-	return 0
+	return df_urldb, 0
 
 	
 #----------
 # main
 #----------
 if __name__ == "__main__":
-	update_urldb()
+	df_urldb, drop = update_urldb()
+	df_urldb.to_csv("urldb_out.csv", index=True)
 
