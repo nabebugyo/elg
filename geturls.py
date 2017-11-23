@@ -16,7 +16,10 @@
 def get_html(targeturl):
 	import urllib.request
 	
-	response = urllib.request.urlopen(targeturl)
+	try:
+		response = urllib.request.urlopen(targeturl)
+	except:
+		return "HTTPError"
 	rescode = response.getcode()
 	
 	if rescode != 200:
