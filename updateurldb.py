@@ -14,7 +14,7 @@ def read_urllist_from_csv_to_df(parentkey, parentdepth):
 		df = pd.read_csv("urllist.csv")
 	except:
 		print("./urllist.csv is empty or not existing.")
-		return 0
+		return 0, -1
 	df = df.T
 	df.reset_index(drop=False, inplace=True)
 	df.columns = ["url"]
@@ -40,7 +40,7 @@ def read_urllist_from_csv_to_df(parentkey, parentdepth):
 		df_urldb = df
 	
 	del df
-	return df_urldb
+	return df_urldb, 0
 
 
 #----------
@@ -63,10 +63,9 @@ def select_url(df_urldb):
 	import datetime
 	date = datetime.datetime.today()
 	#today = print("%s%s%s" % (date.year, date.month, date.day))
-	today = str(date.year)+str(date.month)+str(date.day)
+	today = int(str(date.year)+str(date.month)+str(date.day))
 	
 	# choose a url from db and get cited urls
-#	import sys
 	import pandas as pd
 	for key, row in df_urldb.iterrows():
 
@@ -75,18 +74,23 @@ def select_url(df_urldb):
 		if url[:4] != "http":
 			continue
 
-		# limitation on searching depth
-		MAX_DEPTH = 10
+		# Debug: limitation on searching depth
+		MAX_DEPTH = 3
 		if depth > MAX_DEPTH:
+			print("Debug: excess of MAX_DEPTH")
 			continue
+
+		# need exception for loop caused by same url
 		
 		# pick a url and scan it
 		if date != today:
 			targeturl = url
 			print("try to scan: " + targeturl)
 			queue_to_geturls(targeturl)
-			df_urldb.last_scanned_date = today
-			new_urldb = read_urllist_from_csv_to_df(key, depth)
+			df_urldb["last_scanned_date"][key] = today
+			new_urldb, ret = read_urllist_from_csv_to_df(key, depth)
+			if ret == -1:
+				continue
 			df_urldb = pd.concat([df_urldb, new_urldb])
 			df_urldb.reset_index(drop=True, inplace=True)
 			return df_urldb, key, 1
@@ -101,9 +105,16 @@ def update_urldb():
 #	df_urldb = pd.DataFrame()
 	initial_key = 0
 	initial_depth = 0
-	df_urldb = read_urllist_from_csv_to_df(initial_key, initial_depth)
+	df_urldb, ret = read_urllist_from_csv_to_df(initial_key, initial_depth)
 	ret = 1
 	while ret == 1:
+		
+		# Debug: limitation on url records
+		MAX_LENGTH = 1000
+		if len(df_urldb) > MAX_LENGTH:
+			print("Debug: excess of MAX_LENGTH")
+			break
+
 		df_urldb, last_scanned_id, ret = select_url(df_urldb)
 		print(df_urldb)
 	return df_urldb, 0
