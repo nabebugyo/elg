@@ -92,6 +92,7 @@ def select_url(df_urldb):
 			if ret == -1:
 				continue
 			df_urldb = pd.concat([df_urldb, new_urldb])
+			df_urldb = df_urldb.drop_duplicates(["url"],keep="first")
 			df_urldb.reset_index(drop=True, inplace=True)
 			return df_urldb, key, 1
 	return df_urldb, key, 0
