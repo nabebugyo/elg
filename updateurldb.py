@@ -83,6 +83,16 @@ def select_url(df_urldb):
 		# pick a url and scan it
 		if date != today:
 			targeturl = url
+			
+			# skip duplicated urls
+			if df_urldb.url.isin([url]).any() == True:
+				latest = max(df_urldb[df_urldb.url.isin([url])]["last_scanned_date"])
+				if latest == today:
+					print("skip scanned url: " + targeturl)
+					df_urldb["last_scanned_date"][key] = today
+					df_urldb["depth"][key] = df_urldb["depth"][parent] + 1
+					continue
+			
 			print("try to scan: " + targeturl)
 			queue_to_geturls(targeturl)
 			df_urldb["last_scanned_date"][key] = today
@@ -90,7 +100,7 @@ def select_url(df_urldb):
 			if ret == -1:
 				continue
 			df_urldb = pd.concat([df_urldb, new_urldb])
-			df_urldb = df_urldb.drop_duplicates(["url"],keep="first")
+#			df_urldb = df_urldb.drop_duplicates(["url"],keep="first")
 			df_urldb.reset_index(drop=True, inplace=True)
 			return df_urldb, key, 1
 	return df_urldb, key, 0
@@ -109,7 +119,7 @@ def update_urldb():
 	while ret == 1:
 		
 		# Debug: limitation on url records
-		MAX_LENGTH = 1000
+		MAX_LENGTH = 20000
 		if len(df_urldb) > MAX_LENGTH:
 			print("Debug: excess of MAX_LENGTH")
 			break
