@@ -80,8 +80,6 @@ def select_url(df_urldb):
 			print("Debug: excess of MAX_DEPTH")
 			continue
 
-		# need exception for loop caused by same url
-		
 		# pick a url and scan it
 		if date != today:
 			targeturl = url
