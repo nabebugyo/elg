@@ -65,7 +65,11 @@ def extract_urls(source):
 	#----------
 	fw = open("urllist.csv", "w")
 	for l in urls:
-		fw.write(l+",")
+		l = l+","
+		l = str(l.encode("utf-8"))
+		l = l[2:-1]
+		#print(l)
+		fw.write(l)
 	fw.close()
 	
 	return 0
@@ -84,6 +88,7 @@ def extract_body(source):
 	body = s1[:s1.find("</body>")]
 	
 	body = str(body.encode("utf-8"))
+	body = body[2:-1]
 	#print(body)
 	
 	#----------
