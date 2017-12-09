@@ -83,6 +83,7 @@ def extract_body(source):
 	s1 = s1[s1.find("<body"):]
 	body = s1[:s1.find("</body>")]
 	
+	body = str(body.encode("utf-8"))
 	#print(body)
 	
 	#----------
