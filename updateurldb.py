@@ -119,7 +119,7 @@ def update_urldb():
 	while ret == 1:
 		
 		# Debug: limitation on url records
-		MAX_LENGTH = 40
+		MAX_LENGTH = 20000
 		if len(df_urldb) > MAX_LENGTH:
 			print("Debug: excess of MAX_LENGTH")
 			break
