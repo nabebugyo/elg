@@ -119,7 +119,7 @@ def update_urldb():
 	while ret == 1:
 		
 		# Debug: limitation on url records
-		MAX_LENGTH = 20000
+		MAX_LENGTH = 40
 		if len(df_urldb) > MAX_LENGTH:
 			print("Debug: excess of MAX_LENGTH")
 			break
@@ -133,6 +133,19 @@ def update_urldb():
 # main
 #----------
 if __name__ == "__main__":
+	from cassandra.cluster import Cluster
+
+	host = ["cassandra"]
+	keyspace = "elgoog"
+
+	cluster = Cluster(host)
+	session = cluster.connect()
+
 	df_urldb, drop = update_urldb()
 	df_urldb.to_csv("urldb_out.csv", index=True)
-
+	for i in range(len(df_urldb.index)):
+		this_list=df_urldb.loc[i].tolist()
+		this_cql="INSERT INTO elgoog.pagetable (id,url,last_scanned_date,score,depth,parent) VALUES ("
+		this_cql = this_cql+str(i)+",'"+this_list[0]+"',"+str(this_list[1])+","+str(this_list[2])+","+str(this_list[3])+","+str(this_list[4])+")"
+		#print(this_cql)
+		session.execute(this_cql)
